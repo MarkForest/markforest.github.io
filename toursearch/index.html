@@ -1,0 +1,482 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TourSearch case study</title>
+<meta name="description" content="TourSearch: a tour search platform that queries several tour operators at once and merges their offers into one list. Case study by Anatoliy Marchenko.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f5f8fa;
+  --surface: #ffffff;
+  --ink: #102a3a;
+  --muted: #45596a;
+  --line: #d5dfe6;
+  --sea: #0b6e79;
+  --sun: #f2b630;
+  --lane-a: #0b6e79;
+  --lane-b: #5b4bc4;
+  --lane-c: #a65a0b;
+  --track: #e3ebf0;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0d1c26;
+    --surface: #132836;
+    --ink: #e8f0f4;
+    --muted: #a9bcc8;
+    --line: #29435a;
+    --sea: #5cc8d3;
+    --sun: #f2b630;
+    --lane-a: #5cc8d3;
+    --lane-b: #a99cf5;
+    --lane-c: #f0a35a;
+    --track: #1f3a4b;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0d1c26; --surface: #132836; --ink: #e8f0f4; --muted: #a9bcc8; --line: #29435a;
+  --sea: #5cc8d3; --sun: #f2b630; --lane-a: #5cc8d3; --lane-b: #a99cf5; --lane-c: #f0a35a; --track: #1f3a4b;
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: "Schibsted Grotesk", system-ui, sans-serif;
+  font-size: 18px;
+  line-height: 1.55;
+}
+a { color: var(--sea); text-underline-offset: 3px; }
+a:focus-visible, button:focus-visible { outline: 3px solid var(--sun); outline-offset: 3px; border-radius: 4px; }
+
+.wrap { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
+.topnav { padding-top: 24px; font-weight: 600; font-size: 17px; }
+.topnav a { color: var(--ink); text-decoration: none; }
+.topnav a:hover { text-decoration: underline; }
+.shot-wide { margin-top: 0; }
+.prose { max-width: 68ch; }
+
+h1, h2, h3 { line-height: 1.15; margin: 0; }
+h2 { font-size: 34px; font-weight: 800; letter-spacing: -0.01em; margin-bottom: 24px; }
+h3 { font-size: 21px; font-weight: 600; margin-bottom: 8px; }
+p { margin: 0 0 16px; }
+
+section { padding: 88px 0 0; }
+section:last-of-type { padding-bottom: 96px; }
+
+/* Hero */
+.hero { padding: 64px 0 24px; display: grid; grid-template-columns: 1.05fr 1fr; gap: 56px; align-items: center; }
+.hero h1 { font-size: clamp(48px, 7vw, 84px); font-weight: 800; letter-spacing: -0.03em; margin-bottom: 20px; }
+.lead { font-size: 22px; line-height: 1.45; color: var(--ink); max-width: 30ch; }
+.byline { color: var(--muted); font-size: 16px; margin-top: 20px; }
+.actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
+.btn {
+  display: inline-block; padding: 14px 22px; border-radius: 10px; font-weight: 600; font-size: 17px;
+  text-decoration: none; border: 2px solid transparent;
+}
+.btn-primary { background: var(--sun); color: #102a3a; }
+.btn-secondary { border-color: var(--line); color: var(--ink); }
+
+/* Merge animation */
+.merge {
+  background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 24px;
+}
+.merge-query { font-weight: 600; font-size: 17px; margin-bottom: 4px; }
+.merge-sub { color: var(--muted); font-size: 15px; margin-bottom: 20px; }
+.lane { display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; margin-bottom: 16px; font-size: 15px; }
+.lane-name { font-weight: 600; }
+.lane-proto { color: var(--muted); font-weight: 400; }
+.lane-count { font-variant-numeric: tabular-nums; color: var(--muted); text-align: right; min-width: 9ch; }
+.lane-bar { grid-column: 1 / -1; height: 8px; border-radius: 4px; background: var(--track); overflow: hidden; }
+.lane-fill { height: 100%; width: 0; border-radius: 4px; }
+.lane[data-lane="a"] .lane-fill { background: var(--lane-a); }
+.lane[data-lane="b"] .lane-fill { background: var(--lane-b); }
+.lane[data-lane="c"] .lane-fill { background: var(--lane-c); }
+.merged {
+  border-top: 1px solid var(--line); margin-top: 20px; padding-top: 16px;
+  display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap;
+}
+.merged-num { font-size: 40px; font-weight: 800; font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
+.merged-label { color: var(--muted); font-size: 15px; }
+.replay { background: none; border: 1px solid var(--line); color: var(--ink); font: inherit; font-size: 15px; padding: 6px 12px; border-radius: 8px; cursor: pointer; }
+.merge-note { color: var(--muted); font-size: 14px; margin: 14px 0 0; }
+
+/* Features */
+.features { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 40px 56px; }
+.features p { color: var(--muted); margin: 0; }
+
+/* Diagram */
+.diagram { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 24px; overflow-x: auto; }
+.diagram svg { display: block; min-width: 760px; width: 100%; height: auto; }
+.diagram text { font-family: "Schibsted Grotesk", system-ui, sans-serif; fill: var(--ink); }
+.diagram .sub { fill: var(--muted); font-size: 13px; }
+.diagram .box { fill: var(--bg); stroke: var(--line); stroke-width: 1.5; }
+.diagram .box-key { fill: var(--bg); stroke: var(--sea); stroke-width: 2; }
+.diagram .edge { stroke: var(--muted); stroke-width: 1.5; fill: none; }
+.diagram .edge-loop { stroke: var(--lane-c); stroke-width: 1.5; fill: none; stroke-dasharray: 5 4; }
+.diagram .group { fill: none; stroke: var(--line); stroke-dasharray: 3 4; }
+.caption { color: var(--muted); font-size: 16px; margin-top: 16px; max-width: 68ch; }
+
+/* Engineering notes */
+.notes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 40px 56px; }
+.notes article p { color: var(--muted); margin: 0; }
+
+/* Numbers */
+.facts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0; border-top: 2px solid var(--ink); margin: 0; }
+.facts div { padding: 20px 24px 24px 0; border-bottom: 1px solid var(--line); }
+.facts dt { font-size: 30px; font-weight: 800; letter-spacing: -0.01em; }
+.facts dd { margin: 4px 0 0; color: var(--muted); font-size: 16px; max-width: 28ch; }
+
+/* Stack and role */
+.split { display: grid; grid-template-columns: 1fr 1fr; gap: 56px; }
+.stack { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+.stack li { border: 1px solid var(--line); border-radius: 8px; padding: 6px 12px; font-size: 16px; background: var(--surface); }
+
+/* Screens */
+.shots { display: grid; grid-template-columns: minmax(0, 2.6fr) minmax(0, 1fr); gap: 24px; align-items: start; margin-top: 32px; }
+.shot { margin: 0; }
+.shot img { display: block; width: 100%; height: auto; border-radius: 12px; border: 1px solid var(--line); background: #fff; }
+.shot figcaption { color: var(--muted); font-size: 15px; margin-top: 8px; }
+
+footer { border-top: 1px solid var(--line); padding: 32px 0 48px; color: var(--muted); font-size: 16px; }
+footer p { margin: 0 0 6px; }
+.contacts { display: flex; flex-wrap: wrap; gap: 8px 24px; }
+
+@media (max-width: 860px) {
+  .hero, .split { grid-template-columns: 1fr; gap: 40px; }
+  .features, .notes { grid-template-columns: 1fr; gap: 32px; }
+  .shots { grid-template-columns: 1fr; }
+  .shots .shot:last-child { max-width: 320px; }
+  .facts { grid-template-columns: 1fr 1fr; }
+  section { padding-top: 64px; }
+}
+@media (max-width: 520px) {
+  .wrap { padding: 0 16px; }
+  body { font-size: 17px; }
+  h2 { font-size: 28px; }
+  .lead { font-size: 20px; }
+  .facts { grid-template-columns: 1fr; }
+  .merge, .diagram { padding: 16px; }
+}
+</style>
+</head>
+<body>
+<nav class="wrap topnav" aria-label="Site"><a href="../">Anatoliy Marchenko</a></nav>
+<main class="wrap">
+
+  <header class="hero">
+    <div>
+      <h1>TourSearch</h1>
+      <p class="lead">One search across several tour operators, merged into a single list of hotels. Embeds on any travel agency website with two lines of HTML.</p>
+      <p class="byline">Case study by Anatoliy Marchenko, sole developer. Built September to November 2026, in production.</p>
+      <div class="actions">
+        <a class="btn btn-primary" href="https://more-turov.pro/agencies">Try the live demo</a>
+        <a class="btn btn-secondary" href="#how-it-works">See how it works</a>
+      </div>
+    </div>
+
+    <div class="merge" aria-label="Illustration: three tour operators answer at different speeds and their offers merge into one list">
+      <p class="merge-query">Egypt, 7 nights, 2 adults</p>
+      <p class="merge-sub">One request goes to every operator at once</p>
+      <div class="lane" data-lane="a" data-ms="2600" data-offers="238">
+        <span class="lane-name">Operator A <span class="lane-proto">SAMO XML</span></span>
+        <span class="lane-count">waiting</span>
+        <div class="lane-bar"><div class="lane-fill"></div></div>
+      </div>
+      <div class="lane" data-lane="b" data-ms="4400" data-offers="171">
+        <span class="lane-name">Operator B <span class="lane-proto">SAMO XML</span></span>
+        <span class="lane-count">waiting</span>
+        <div class="lane-bar"><div class="lane-fill"></div></div>
+      </div>
+      <div class="lane" data-lane="c" data-ms="7800" data-offers="452">
+        <span class="lane-name">Operator C <span class="lane-proto">SOAP</span></span>
+        <span class="lane-count">waiting</span>
+        <div class="lane-bar"><div class="lane-fill"></div></div>
+      </div>
+      <div class="merged">
+        <div>
+          <div class="merged-num" id="merged-num">0</div>
+          <div class="merged-label">hotels in one list, duplicates merged</div>
+        </div>
+        <button class="replay" type="button" id="replay">Replay</button>
+      </div>
+      <p class="merge-note">Results appear as each operator answers. A slow operator never holds up a fast one.</p>
+    </div>
+  </header>
+
+  <section aria-labelledby="problem">
+    <div class="prose">
+      <h2 id="problem">The problem</h2>
+      <p>A travel agency's website relied on a third-party tour search module. The agency did not control the data, the look, or what happened when the module broke, and had nothing of its own to offer partner agencies.</p>
+      <p>The goal was to replace the module with an in-house search on the agency's own server, then turn it into a platform other agencies can sign up for.</p>
+    </div>
+  </section>
+
+  <section aria-labelledby="built">
+    <h2 id="built">What I built</h2>
+    <div class="features">
+      <div>
+        <h3>Search across operators</h3>
+        <p>Each search is sent to every connected operator in parallel. Offers stream into the page as they arrive, with filters, sorting and a price check against the operator before a booking request.</p>
+      </div>
+      <div>
+        <h3>One hotel, one card</h3>
+        <p>Operators name the same hotel differently. A matcher tuned on 900+ hand-checked pairs merges them automatically; doubtful pairs wait in a review queue with one-click merge and undo.</p>
+      </div>
+      <div>
+        <h3>Price warmup</h3>
+        <p>Popular destinations are searched in the background, within each operator's rate limit. When the index is fresh, the search answers from it instead of waiting for live APIs.</p>
+      </div>
+      <div>
+        <h3>Embeddable widget</h3>
+        <p>Two lines of HTML add the whole search to any site: form, results, tour card, gallery, favourites and booking request. Three languages, two currencies, full-screen on phones.</p>
+      </div>
+      <div>
+        <h3>Platform for agencies</h3>
+        <p>Self-service sign-up, domain verification, a cabinet with leads, notifications by email and Telegram, plans and invoices, identity checks, support tickets and 24-hour demo sandboxes.</p>
+      </div>
+      <div>
+        <h3>Operations</h3>
+        <p>Admin panel for operators, catalogue and queues; alerts to a team chat; daily backups. Continuous delivery: a merged pull request reaches production in about two minutes.</p>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="how-it-works" id="how-it-works">
+    <h2>How it works</h2>
+    <div class="diagram">
+      <svg viewBox="0 0 960 400" role="img" aria-labelledby="dia-title">
+        <title id="dia-title">Architecture: tour operator APIs feed provider adapters, then normalisation and hotel matching into the catalogue and offers store; a background warmup queue refreshes prices; the search API serves the widget on agency sites and the agency cabinet.</title>
+        <defs>
+          <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0 0 L10 5 L0 10 z" fill="currentColor" style="fill: var(--muted)"/>
+          </marker>
+        </defs>
+
+        <!-- operators -->
+        <rect class="group" x="8" y="20" width="184" height="290" rx="12"/>
+        <text x="24" y="46" font-size="15" font-weight="600">Tour operators</text>
+        <rect class="box" x="24" y="64" width="152" height="60" rx="8"/>
+        <text x="40" y="90" font-size="15" font-weight="600">Operator A</text>
+        <text class="sub" x="40" y="110">SAMO XML API</text>
+        <rect class="box" x="24" y="140" width="152" height="60" rx="8"/>
+        <text x="40" y="166" font-size="15" font-weight="600">Operator B</text>
+        <text class="sub" x="40" y="186">SAMO XML API</text>
+        <rect class="box" x="24" y="216" width="152" height="60" rx="8"/>
+        <text x="40" y="242" font-size="15" font-weight="600">Operator C</text>
+        <text class="sub" x="40" y="262">SOAP service</text>
+
+        <!-- adapters -->
+        <rect class="box" x="236" y="120" width="160" height="96" rx="8"/>
+        <text x="252" y="150" font-size="15" font-weight="600">Provider adapters</text>
+        <text class="sub" x="252" y="172">one contract,</text>
+        <text class="sub" x="252" y="190">external IDs only</text>
+
+        <path class="edge" d="M176 94 C206 94 206 150 234 150" marker-end="url(#arrow)"/>
+        <path class="edge" d="M176 170 L234 170" marker-end="url(#arrow)"/>
+        <path class="edge" d="M176 246 C206 246 206 190 234 190" marker-end="url(#arrow)"/>
+
+        <!-- normaliser -->
+        <rect class="box" x="436" y="120" width="170" height="96" rx="8"/>
+        <text x="452" y="150" font-size="15" font-weight="600">Normaliser</text>
+        <text class="sub" x="452" y="172">IDs to catalogue,</text>
+        <text class="sub" x="452" y="190">hotel matching queue</text>
+        <path class="edge" d="M396 168 L434 168" marker-end="url(#arrow)"/>
+
+        <!-- store -->
+        <rect class="box-key" x="646" y="110" width="152" height="116" rx="8"/>
+        <text x="662" y="142" font-size="15" font-weight="600">Catalogue</text>
+        <text x="662" y="162" font-size="15" font-weight="600">and offers</text>
+        <text class="sub" x="662" y="186">PostgreSQL,</text>
+        <text class="sub" x="662" y="204">monthly partitions</text>
+        <path class="edge" d="M606 168 L644 168" marker-end="url(#arrow)"/>
+
+        <!-- warmup loop -->
+        <rect class="box" x="236" y="300" width="370" height="76" rx="8"/>
+        <text x="252" y="326" font-size="15" font-weight="600">Price warmup</text>
+        <text class="sub" x="252" y="346">Redis queues, within each operator's rate limit;</text>
+        <text class="sub" x="252" y="364">a failing route pauses alone</text>
+        <path class="edge-loop" d="M316 300 L316 218" marker-end="url(#arrow)"/>
+        <path class="edge-loop" d="M722 226 L722 332 L608 332" marker-end="url(#arrow)"/>
+
+        <!-- search api -->
+        <rect class="box" x="838" y="40" width="114" height="76" rx="8"/>
+        <text x="850" y="70" font-size="15" font-weight="600">Search API</text>
+        <text class="sub" x="850" y="92">streams results</text>
+        <path class="edge" d="M798 140 C820 140 820 78 836 78" marker-end="url(#arrow)"/>
+
+        <rect class="box" x="838" y="146" width="114" height="76" rx="8"/>
+        <text x="850" y="176" font-size="15" font-weight="600">Widget</text>
+        <text class="sub" x="850" y="198">Shadow DOM</text>
+        <path class="edge" d="M895 116 L895 144" marker-end="url(#arrow)"/>
+
+        <rect class="box" x="838" y="252" width="114" height="76" rx="8"/>
+        <text x="850" y="282" font-size="15" font-weight="600">Cabinet</text>
+        <text class="sub" x="850" y="304">and admin</text>
+        <path class="edge" d="M798 200 C820 200 820 290 836 290" marker-end="url(#arrow)"/>
+      </svg>
+    </div>
+    <p class="caption">Adapters know only the operator's own identifiers. Mapping to the shared catalogue happens in one place, and an architecture test stops adapters from touching the database. Adding an operator means writing an adapter, not changing search.</p>
+  </section>
+
+  <section aria-labelledby="hard-parts">
+    <h2 id="hard-parts">The hard parts</h2>
+    <div class="notes">
+      <article>
+        <h3>A 600 MB catalogue response</h3>
+        <p>One operator's hotel endpoint repeats every hotel dozens of times; a single country came back at 602 MB. A streaming parser reads it from disk: 14,000 hotels in seven minutes at a 72 MB memory peak. The same API encodes every number as a float, so fixtures are built from raw XML.</p>
+      </article>
+      <article>
+        <h3>Money is never a float</h3>
+        <p>Prices are <code>numeric(12,2)</code> in the database and strings in PHP and JSON, compared with <code>bccomp</code>. Converting to a number anywhere loses cents silently, so the rule is enforced in review and tests.</p>
+      </article>
+      <article>
+        <h3>No silent data loss</h3>
+        <p>An unknown meal code never aborts an import. An offer for an unmatched hotel is kept and queued for matching. An empty response never wipes the catalogue. Early on I found seven losses that all looked like successful runs.</p>
+      </article>
+      <article>
+        <h3>Failure stays local</h3>
+        <p>If one destination keeps failing at one operator, only that pair pauses: 15 minutes, then an hour, then a block for one, three and seven days with a single probe after each. Everything else keeps running.</p>
+      </article>
+      <article>
+        <h3>A widget that survives any host page</h3>
+        <p>A host site set the root font size to 10px and shrank every rem-based element. The widget now renders in Shadow DOM, resets inherited styles, and the build converts rem to px. A browser test matrix runs it on different host pages.</p>
+      </article>
+      <article>
+        <h3>Results that keep their place</h3>
+        <p>Offers arrive in waves while the visitor scrolls. The client tells the server what it has already shown, so new offers append below instead of reshuffling what the visitor is reading.</p>
+      </article>
+    </div>
+  </section>
+
+  <section aria-labelledby="numbers">
+    <h2 id="numbers">In numbers</h2>
+    <dl class="facts">
+      <div><dt>16,000+</dt><dd>hotels from three operators in one catalogue</dd></div>
+      <div><dt>48</dt><dd>destination countries</dd></div>
+      <div><dt>15–30 s</dt><dd>live search across all operators; faster from the warm index</dd></div>
+      <div><dt>0</dt><dd>server errors in a production load test, 30,000 requests in 11.5 minutes</dd></div>
+      <div><dt>6,800</dt><dd>automated tests: backend, frontend and real-browser</dd></div>
+      <div><dt>2 min</dt><dd>from merged pull request to production; 300 pull requests in six weeks</dd></div>
+    </dl>
+  </section>
+
+  <section aria-labelledby="stack">
+    <div class="split">
+      <div>
+        <h2 id="stack">Stack</h2>
+        <ul class="stack">
+          <li>PHP 8.3</li><li>Laravel 12</li><li>PostgreSQL</li><li>Redis</li><li>Horizon</li><li>Filament</li>
+          <li>Vue 3</li><li>TypeScript</li><li>Vite</li><li>Pest</li><li>Larastan</li><li>Vitest</li><li>Playwright</li>
+          <li>Docker</li><li>GitHub Actions</li><li>nginx</li>
+        </ul>
+      </div>
+      <div>
+        <h2>My role</h2>
+        <p>I was the only developer: product design, backend, frontend, infrastructure and the integrations with each operator, from reading their API documentation to live probes on production.</p>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="screens">
+    <h2 id="screens">Screens</h2>
+    <figure class="shot shot-wide">
+      <img src="img/results.jpg" width="1600" height="1000" alt="Search form and a grid of hotel results for Egypt, sorted by lowest price, prices in US dollars" loading="lazy">
+      <figcaption>A live search: 463 hotels from all operators in one list, prices switched to dollars without a new search</figcaption>
+    </figure>
+    <div class="shots">
+      <figure class="shot">
+        <img src="img/tour-card.jpg" width="1600" height="1157" alt="Tour card with a photo gallery, tabs for tour, description and map, and a panel to change dates, nights, meals and room" loading="lazy">
+        <figcaption>Tour card: change dates, nights, meals and room without leaving it</figcaption>
+      </figure>
+      <figure class="shot">
+        <img src="img/phone.jpg" width="640" height="1385" alt="The same results on a phone screen, one hotel per row" loading="lazy">
+        <figcaption>On a phone</figcaption>
+      </figure>
+    </div>
+    <p class="caption">Screenshots from production. Hotel and resort names come from operators as they send them.</p>
+  </section>
+
+  <section aria-labelledby="try">
+    <div class="prose">
+      <h2 id="try">Try it</h2>
+      <p>The demo creates a private sandbox agency for 24 hours: the cabinet, the widget and live search with real operator data. It runs on the first client's production instance, so the interface opens in the client's language; the widget also speaks English.</p>
+      <div class="actions">
+        <a class="btn btn-primary" href="https://more-turov.pro/agencies">Open the live demo</a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <p>Anatoliy Marchenko, full-stack developer</p>
+    <p class="contacts"><a href="https://github.com/MarkForest">GitHub</a> <a href="https://t.me/mark4rest">Telegram</a> <a href="mailto:amarchenkodev@gmail.com">amarchenkodev@gmail.com</a></p>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var lanes = Array.prototype.slice.call(document.querySelectorAll('.lane'));
+  var total = document.getElementById('merged-num');
+  var replay = document.getElementById('replay');
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // Hotels in the merged list after each operator answers: overlap between operators means the sum is smaller
+  var steps = [212, 318, 415];
+  var timers = [];
+
+  function finalState() {
+    lanes.forEach(function (lane) {
+      lane.querySelector('.lane-fill').style.width = '100%';
+      lane.querySelector('.lane-count').textContent = lane.dataset.offers + ' offers';
+    });
+    total.textContent = steps[steps.length - 1];
+  }
+
+  function countTo(target) {
+    var from = parseInt(total.textContent, 10) || 0;
+    var start = null;
+    function tick(now) {
+      if (start === null) start = now;
+      var t = Math.max(0, Math.min(1, (now - start) / 600));
+      total.textContent = Math.round(from + (target - from) * t);
+      if (t < 1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  }
+
+  function run() {
+    timers.forEach(clearTimeout);
+    timers = [];
+    total.textContent = '0';
+    var order = lanes.slice().sort(function (a, b) { return a.dataset.ms - b.dataset.ms; });
+    lanes.forEach(function (lane) {
+      var fill = lane.querySelector('.lane-fill');
+      fill.style.transition = 'none';
+      fill.style.width = '0';
+      lane.querySelector('.lane-count').textContent = 'waiting';
+      void fill.offsetWidth;
+      fill.style.transition = 'width ' + lane.dataset.ms + 'ms cubic-bezier(.3,.1,.4,1)';
+      fill.style.width = '100%';
+    });
+    order.forEach(function (lane, i) {
+      timers.push(setTimeout(function () {
+        lane.querySelector('.lane-count').textContent = '+' + lane.dataset.offers + ' offers';
+        countTo(steps[i]);
+      }, Number(lane.dataset.ms)));
+    });
+  }
+
+  if (reduce) { finalState(); } else { run(); }
+  replay.addEventListener('click', function () { if (reduce) { finalState(); } else { run(); } });
+})();
+</script>
+</body>
+</html>
