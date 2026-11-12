@@ -116,6 +116,7 @@ section:last-of-type { padding-bottom: 96px; }
 /* Features */
 .features { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 40px 56px; }
 .features p { color: var(--muted); margin: 0; }
+.prose + .features { margin-top: 32px; }
 
 /* Diagram */
 .diagram { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 24px; overflow-x: auto; }
@@ -361,6 +362,39 @@ footer p { margin: 0 0 6px; }
     </div>
   </section>
 
+  <section aria-labelledby="built-with">
+    <div class="prose">
+      <h2 id="built-with">How it was built</h2>
+      <p>TourSearch was built with Claude Code, using spec-first, subagent-driven development (SDD). I set the direction and made the decisions; agents wrote most of the code inside a strict process.</p>
+    </div>
+    <div class="features">
+      <div>
+        <h3>Spec, plan, then code</h3>
+        <p>Every feature starts as a spec and an implementation plan broken into small tasks: 22 specs, 42 plans and 104 tickets so far.</p>
+      </div>
+      <div>
+        <h3>A subagent per task, a review per task</h3>
+        <p>A fresh subagent implements one task; its result is reviewed against the spec and for code quality before the next task starts. The whole branch gets a final review before merge.</p>
+      </div>
+      <div>
+        <h3>Decisions with their reasons</h3>
+        <p>31 decision logs with 140+ numbered rulings record why something was done this way and what a mistake would cost, so later sessions don't reopen settled questions.</p>
+      </div>
+      <div>
+        <h3>Rules that agents read every session</h3>
+        <p>CLAUDE.md holds the rules that break the product silently: money as strings, no silent data loss, the conditions a query needs to hit the partial index.</p>
+      </div>
+      <div>
+        <h3>Parallel work without collisions</h3>
+        <p>Each task runs in its own git worktree and Docker project, so several sessions work at once without touching each other's code or databases.</p>
+      </div>
+      <div>
+        <h3>Gates instead of trust</h3>
+        <p>About 6,800 tests, static analysis, architecture tests, CI on every pull request and smoke checks after each automated deploy decide what reaches production.</p>
+      </div>
+    </div>
+  </section>
+
   <section aria-labelledby="numbers">
     <h2 id="numbers">In numbers</h2>
     <dl class="facts">
@@ -380,12 +414,12 @@ footer p { margin: 0 0 6px; }
         <ul class="stack">
           <li>PHP 8.3</li><li>Laravel 12</li><li>PostgreSQL</li><li>Redis</li><li>Horizon</li><li>Filament</li>
           <li>Vue 3</li><li>TypeScript</li><li>Vite</li><li>Pest</li><li>Larastan</li><li>Vitest</li><li>Playwright</li>
-          <li>Docker</li><li>GitHub Actions</li><li>nginx</li>
+          <li>Docker</li><li>GitHub Actions</li><li>nginx</li><li>Claude Code</li>
         </ul>
       </div>
       <div>
         <h2>My role</h2>
-        <p>I was the only developer: product design, backend, frontend, infrastructure and the integrations with each operator, from reading their API documentation to live probes on production.</p>
+        <p>I was the only developer: product design, backend, frontend, infrastructure and the integrations with each operator, from reading their API documentation to live probes on production. I also designed the AI development process: how specs, plans, subagents, reviews and gates fit together.</p>
       </div>
     </div>
   </section>

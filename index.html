@@ -64,7 +64,7 @@ h2 { font-size: 34px; font-weight: 800; letter-spacing: -0.01em; margin-bottom: 
 .work-meta { margin-top: auto; padding-top: 16px; color: var(--muted); font-size: 16px; }
 .work-cta { color: var(--sea); font-weight: 600; margin-top: 8px; }
 
-.skills { padding-top: 88px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 40px 56px; }
+.skills { padding-top: 88px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 40px 56px; }
 .skills h3 { font-size: 21px; font-weight: 600; margin-bottom: 8px; }
 .skills p { color: var(--muted); margin: 0; }
 
@@ -99,7 +99,7 @@ h2 { font-size: 34px; font-weight: 800; letter-spacing: -0.01em; margin-bottom: 
   <header class="intro">
     <h1>Anatolii Marchenko</h1>
     <p class="lead">Full-stack developer. I build web products end to end, from the first schema to production.</p>
-    <p class="more">Most of my work is PHP and Laravel on the backend, Vue and TypeScript on the frontend, PostgreSQL underneath, and integrations with other companies' APIs that rarely behave the way their documentation says.</p>
+    <p class="more">Most of my work is PHP and Laravel on the backend, Vue and TypeScript on the frontend, PostgreSQL underneath, and integrations with other companies' APIs that rarely behave the way their documentation says. I build with Claude Code as an engineering team: spec first, then a plan, then subagent-driven development with review at every step.</p>
   </header>
 
   <section aria-labelledby="work">
@@ -127,6 +127,10 @@ h2 { font-size: 34px; font-weight: 800; letter-spacing: -0.01em; margin-bottom: 
     <div>
       <h3>Frontend and delivery</h3>
       <p>Vue and TypeScript interfaces, embeddable widgets that survive any host page, Docker, CI and continuous delivery to production.</p>
+    </div>
+    <div>
+      <h3>AI-assisted engineering</h3>
+      <p>Claude Code with spec-first, subagent-driven development (SDD): every task is implemented by a subagent and reviewed against the spec before the next one starts. Project rules in CLAUDE.md, parallel sessions in git worktrees, decisions logged with their reasons, and tests and CI as the gate.</p>
     </div>
   </section>
 
