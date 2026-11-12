@@ -1,6 +1,6 @@
 # markforest.github.io
 
-Portfolio of Anatoliy Marchenko, full-stack developer: https://markforest.github.io
+Portfolio of Anatolii Marchenko, full-stack developer: https://markforest.github.io
 
 - `index.html` — portfolio page
 - `toursearch/` — TourSearch case study
