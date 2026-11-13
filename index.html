@@ -68,6 +68,27 @@ h2 { font-size: 34px; font-weight: 800; letter-spacing: -0.01em; margin-bottom: 
 .skills h3 { font-size: 21px; font-weight: 600; margin-bottom: 8px; }
 .skills p { color: var(--muted); margin: 0; }
 
+.oss { padding-top: 88px; }
+.oss .sub { color: var(--muted); max-width: 60ch; margin-bottom: 28px; }
+.oss-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; }
+.tool {
+  display: flex; flex-direction: column; background: var(--surface); border: 1px solid var(--line);
+  border-radius: 16px; overflow: hidden; text-decoration: none; color: inherit;
+}
+.tool:hover .tool-title, .tool:focus-visible .tool-title { text-decoration: underline; text-underline-offset: 4px; }
+.tool-visual { aspect-ratio: 16 / 9; border-bottom: 1px solid var(--line); background: var(--bg); }
+.tool-visual img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: center top; }
+.tool-visual.text { padding: 20px; display: grid; grid-template-rows: auto auto 1fr; gap: 10px; align-content: start;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 13.5px; line-height: 1.5; }
+.tool-visual .before { color: var(--muted); }
+.tool-visual .arrow { color: var(--sea); font-weight: 600; }
+.tool-visual .after { color: var(--ink); white-space: pre-line; }
+.tool-body { padding: 24px 28px 28px; display: flex; flex-direction: column; flex: 1; }
+.tool-title { font-size: 26px; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 10px; }
+.tool-body p { color: var(--muted); }
+.tool-meta { margin-top: auto; padding-top: 8px; color: var(--muted); font-size: 16px; }
+.tool-cta { color: var(--sea); font-weight: 600; margin-top: 8px; }
+
 .contact { padding: 88px 0 96px; }
 .contact p { max-width: 60ch; }
 .contact-links { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 24px; }
@@ -81,6 +102,8 @@ h2 { font-size: 34px; font-weight: 800; letter-spacing: -0.01em; margin-bottom: 
   .work { grid-template-columns: 1fr; }
   .work img { border-right: 0; border-bottom: 1px solid var(--line); height: auto; aspect-ratio: 16 / 10; }
   .skills { grid-template-columns: 1fr; gap: 32px; padding-top: 64px; }
+  .oss { padding-top: 64px; }
+  .oss-grid { grid-template-columns: 1fr; }
   .intro { padding: 64px 0 56px; }
   .contact { padding: 64px 0 72px; }
 }
@@ -90,6 +113,7 @@ h2 { font-size: 34px; font-weight: 800; letter-spacing: -0.01em; margin-bottom: 
   h2, .work-title { font-size: 28px; }
   .intro .lead { font-size: 20px; }
   .work-body { padding: 24px; }
+  .tool-body { padding: 20px 20px 24px; }
 }
 </style>
 </head>
@@ -131,6 +155,40 @@ h2 { font-size: 34px; font-weight: 800; letter-spacing: -0.01em; margin-bottom: 
     <div>
       <h3>AI-assisted engineering</h3>
       <p>Claude Code with spec-first, subagent-driven development (SDD): every task is implemented by a subagent and reviewed against the spec before the next one starts. Project rules in CLAUDE.md, parallel sessions in git worktrees, decisions logged with their reasons, and tests and CI as the gate.</p>
+    </div>
+  </section>
+
+  <section class="oss" aria-labelledby="oss">
+    <h2 id="oss">Open-source Claude Code skills</h2>
+    <p class="sub">Things I built for my own work with Claude Code and published for everyone. Free, MIT, install in one command.</p>
+    <div class="oss-grid">
+      <a class="tool" href="https://github.com/MarkForest/resume-create">
+        <div class="tool-visual"><img src="img/resume-create.jpg" width="1600" height="900" alt="resume-create: the same resume in three themes" loading="lazy"></div>
+        <div class="tool-body">
+          <h3 class="tool-title">resume-create</h3>
+          <p>Tailors a resume to one job posting in a single prompt: a one-page PDF and a short cover letter in the language of the posting. It asks about gaps instead of inventing experience. Research-backed design, eight languages.</p>
+          <p class="tool-meta">Claude Code skill and plugin. Python, headless Chrome.</p>
+          <span class="tool-cta">View on GitHub</span>
+        </div>
+      </a>
+      <a class="tool" href="https://github.com/MarkForest/normalize-prompt">
+        <div class="tool-visual text" aria-hidden="true">
+          <div class="before">so basically the meal filter should allow picking several options at once, like AI and UAI together. and keep it in the url. tests pls, and DON'T touch the backend api</div>
+          <div class="arrow">/normalize &darr;</div>
+          <div class="after">## Goal
+The meal filter accepts several values at once.
+## Must be true
+- Selected meals are kept in the URL.
+- Backend API is unchanged.
+- Tests cover multi-select.</div>
+        </div>
+        <div class="tool-body">
+          <h3 class="tool-title">normalize-prompt</h3>
+          <p>Rewrites a rambling prompt into a compact engineering prompt: a goal, a checkable list of what must be true, and how to work. Runs on a cheap model, nothing gets lost or invented. English, Ukrainian, Russian.</p>
+          <p class="tool-meta">Claude Code skill and plugin.</p>
+          <span class="tool-cta">View on GitHub</span>
+        </div>
+      </a>
     </div>
   </section>
 
